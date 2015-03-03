@@ -1,53 +1,83 @@
 $(function () {
+  var file = 'Mumbai.GPX';
   $.ajax({
-    url: './data/Mumbai.GPX',
+    url: './data/' + file,
     dataType: 'xml'
   }).done( function (rawData) {
     var minlat = $(rawData).find('metadata').find('bounds').attr('minlat');
     var maxlat = $(rawData).find('metadata').find('bounds').attr('maxlat');
     var minlon = $(rawData).find('metadata').find('bounds').attr('minlon');
     var maxlon = $(rawData).find('metadata').find('bounds').attr('maxlon');
+    var wpts   = $(rawData).find('wpt');
+    var trks   = $(rawData).find('trk');
+    var tracksCounter = 0;
 
-    $('#json-container').append('{"metadata": {"minlat": "' + minlat + '","maxlat": "' + maxlat + '","minlon": "' + minlon + '","maxlon": "' + maxlon + '"},"trks": {');
+    var parsedData = {
+      metadata: { minlat: minlat, maxlat: maxlat, minlon: minlon, maxlon: maxlon },
+      tracks: {}
+    };
 
-      getEntries(rawData);
+    if (wpts && wpts.length > 0) {
 
-    $('#json-container').append('}');
-  });
-});
+      $(wpts).each(function () {
+        var name = $(this).find('name').html();
 
-function getEntries (rawData) {
+        parsedData.tracks[tracksCounter] = { name: name, points: {} };
+        extractPointData( $(this) );
+        tracksCounter++;
+      });
 
-  var trksLength = $(rawData).find("trk").length;
+    }
 
-  $(rawData).find("trk").each(function(parentKey, parentValue) {
-    var name = $(this).find('name').html().trim();
+    if (trks && trks.length > 0) {
+      $(trks).each(function (key, value) {
+        var name = $(this).find('name').html();
 
-    $('#json-container').append('"' + parentKey + '": {"name": "' + name + '","points": { ');
+        parsedData.tracks[tracksCounter] = { name: name, points: {} };
+        extractPointData( $(this).find('trkpt') );
+        tracksCounter++;
+      });
+    }
 
-    var trkptsLength = $(this).find('trkpt').length;
+    // console.save(parsedData, 'data.json');
+    // console.log(parsedData);
 
-    $(this).find('trkpt').each(function(key, value) {
-      var lat = $(this).attr('lat');
-      var lon = $(this).attr('lon');
-      var elevation = $(this).find('ele').html();
-      var time = $(this).find('time').html();
 
-      $('#json-container').append('"' + key + '": { "lat": "' + lat + '", "lon": "' + lon + '", "elevation": "' + elevation + '", "time": "' + time + '"');
+    function extractPointData (data) {
+      $(data).each(function (key, value) {
+        var lat       = value.getAttribute('lat')  ? value.getAttribute('lat') : null;
+        var lon       = value.getAttribute('lon')  ? value.getAttribute('lon') : null;
+        var elevation = value.getAttribute('ele')  ? value.getAttribute('ele').innerHTML : null;
+        var time      = value.getAttribute('time') ? value.getAttribute('time').innerHTML : null;
 
-      if (key < trkptsLength - 1) {
-        $('#json-container').append('}, ');
-      } else {
-        $('#json-container').append('} ');
-      }
-
-    });
-
-    if (parentKey < trksLength - 1) {
-      $('#json-container').append('} }, ');
-    } else {
-      $('#json-container').append('} } }');
+        parsedData.tracks[tracksCounter].points[key] = { lat: lat, lon: lon, elevation: elevation, time: time };
+      });
     }
 
   });
-}
+});
+
+(function(console){
+  console.save = function(data, filename) {
+    if(!data) {
+      console.error('Console.save: No data');
+      return;
+    }
+
+    if(!filename) filename = 'console.json';
+
+    if(typeof data === "object"){
+      data = JSON.stringify(data, undefined, 4);
+    }
+
+    var blob = new Blob([data], {type: 'text/json'}),
+        e    = document.createEvent('MouseEvents'),
+        a    = document.createElement('a');
+
+    a.download = filename;
+    a.href = window.URL.createObjectURL(blob);
+    a.dataset.downloadurl =  ['text/json', a.download, a.href].join(':');
+    e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    a.dispatchEvent(e);
+  };
+})(console);
