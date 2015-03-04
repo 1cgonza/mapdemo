@@ -18,7 +18,7 @@ I personally use Sublime Text - http://www.sublimetext.com/3 -
  - Windows: https://windows.github.com/
 
 ###GPS Data
-This I expect each of you to have it ready before class. 
+This I expect each of you to have ready before class. 
 - If you are using the schools tracker, bring the .GPX file. 
 - If you are using google and your phone to track the locations, download the .KML from https://maps.google.com/locationhistory by clicking on the link "Export to KML".
 
