@@ -35,7 +35,7 @@ $(function () {
       $('body').append('var points = [');
 
       for (var i = 0; i < array.length; i++) {
-        $('body').append('[' + array[i][0] + ', ' + array[i][1] + ']');
+        $('body').append('[' + array[i][0] + ',' + array[i][1] + ']');
 
         if (i !== array.length - 1) {
           $('body').append(',');
