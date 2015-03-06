@@ -1,34 +1,51 @@
 $(function () {
   var file = 'Mumbai.GPX';
+  // var file = 'history-02-01-2015.kml';
   $.ajax({
     url: './data/' + file,
     dataType: 'xml'
-  }).done( function (rawData) {
-    var wpts   = $(rawData).find('wpt');
-    var trks   = $(rawData).find('trk');
+  }).done( function (data) {
+    var wpts    = $(data).find('wpt');
+    var trks    = $(data).find('trk');
+    var gPoints = data.getElementsByTagNameNS('http://www.google.com/kml/ext/2.2', 'coord');
+
     var points = [];
 
     if (wpts && wpts.length > 0) {
       $(wpts).each(function () {
-        extractPoints( $(this) );
+        extractPoints( $(this), 'gpx' );
       });
     }
 
     if (trks && trks.length > 0) {
       $(trks).each(function (key, value) {
-        extractPoints( $(this).find('trkpt') );
+        extractPoints( $(this).find('trkpt'), 'gpx' );
       });
+    }
+
+    if (gPoints && gPoints.length > 0) {
+      extractPoints(gPoints, 'kml');
     }
 
     printDataOnScreen(points);
 
-    function extractPoints (data) {
-      $(data).each(function () {
-        var lat = $(this).attr('lat');
-        var lon = $(this).attr('lon');
+    function extractPoints (chunk, type) {
+      var lat, lon;
 
-        points.push([lat, lon]);
-      });
+      if (type === 'gpx') {
+        $(chunk).each(function () {
+          lat = $(this).attr('lat');
+          lon = $(this).attr('lon');
+          points.push([lat, lon]);
+        });
+      } else if (type === 'kml') {
+        $(chunk).each(function () {
+          var values = $(this).html().split(' ');
+          lat = values[1];
+          lon = values[0];
+          points.push([lat, lon]);
+        });
+      }
     }
 
     function printDataOnScreen (array) {
