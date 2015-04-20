@@ -1,6 +1,8 @@
 # Map Demo
 In this short workshop, each of you will learn how to map GPS data into a custom map. At the end you will have your own web page with something like this: http://1cgonza.github.io/mapdemo/
 
+<a href="http://1cgonza.github.io/mapdemo/"><img src="./img/Screenshot-map-detail.jpg></a>
+
 Before the class, please make sure you go through all of the following steps. We need to create accounts in different sites and download a few things. It is all free, so no worries.
 
 ###Map Tiles
